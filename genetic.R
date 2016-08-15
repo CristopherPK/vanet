@@ -28,7 +28,9 @@ GeneticAlgorithm <- function(T = matrix(), k, thresh){
   
   # generating greedy population.
   pop.Greedy <- pop.Size - pop.Rand
+  print("starting greedy population")
   for(i in 1:pop.Greedy){
+    print(i)
     population <- rbind(population, GreedyAlgorithm(T, k, thresh))
   }
   print("greedy population generated.")
@@ -55,24 +57,20 @@ GeneticAlgorithm <- function(T = matrix(), k, thresh){
     pop.Elite <- childs[elite,]
     
     # Generate random individuals for the next generation
+    # TODO: Check if this approach is correct
     while(nrow(pop.Elite) < pop.Size){
       pop.Elite <- rbind(pop.Elite, sample(1:num.Inter, k))
     }
-    
     population <- pop.Elite
     
     num.Gen <- num.Gen - 1
-    
     print(num.Gen)
   }
   
   print("finishing...")
-  final.Fitness <- c()
-  for(i in 1:nrow(population)){
-    final.Fitness <- cbind(final.Fitness,CalcFitness(T,unlist(population[i,]),thresh))
-  }
+  final.Fitness <- sapply(1:nrow(population), function(i = X) CalcFitness(T,unlist(population[i,]),thresh))
   
-  best <- which(population == max(final.Fitness))
+  best <- which(final.Fitness == max(final.Fitness))
   
   s <- population[best,]
   
