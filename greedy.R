@@ -1,5 +1,5 @@
 GreedyAlgorithm <- function(T = matrix(), k, thresh){
-  profvis({
+  
   # Calculating boundaries
   num.Vehicles <- nrow(T)
   num.Inter <- length(T[[1]])
@@ -44,6 +44,7 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
     s <- (append(s, w))
     k = k-1
   }
-  })
+  
   s
+  
 }

@@ -1,4 +1,4 @@
-GeneticAlgorithm <- function(T, k, thresh){
+GeneticAlgorithm <- function(T = matrix(), k, thresh){
   # Calculating boundaries
   num.Vehicles <- nrow(T)
   num.Inter <- length(T[[1]])
@@ -11,9 +11,9 @@ GeneticAlgorithm <- function(T, k, thresh){
   
   # population size
   num.Gen <- 100
-  p.Cross <- 0.95
-  p.Mut <- 0.1
-  pop.Size <- 400
+  p.Cross <- 0.90
+  p.Mut <- 0.10
+  pop.Size <- 200
   
   
   print("initializing population.")
@@ -29,46 +29,63 @@ GeneticAlgorithm <- function(T, k, thresh){
   # generating greedy population.
   pop.Greedy <- pop.Size - pop.Rand
   for(i in 1:pop.Greedy){
-    population <- rbind(population, Greedy(T, k, thresh))
+    population <- rbind(population, GreedyAlgorithm(T, k, thresh))
   }
   print("greedy population generated.")
   
   print("starting evolutionary approach.")
   while(num.Gen > 0){
     
-    # calculating population fitness.
-    pop.Fitness <- c()
-    for(i in 1:nrow(population)){
-      pop.Fitness <- cbind(pop.Fitness,CalcFitness(T,unlist(population[i,])))
-    }
+    # Calculating population fitness.
+    pop.Fitness <- sapply(1:nrow(population), function(i = X) CalcFitness(T,unlist(population[i,]),thresh))
     
-    # performing tournament selection with size 2. 
+    # Performing tournament selection with size 2. 
     # TODO: edit this function to accept different size of tournament selection.
     parents <- TournamentSelection(pop.Fitness)
     
     # Execute one-point crossover with probability pcross
-    childs <- GenerateChilds(population, parents, num.Inter)
+    childs <- GenerateChilds(population, parents, num.Inter, p.Cross = p.Cross)
     
     # Execute one-point mutation with probability pmut
-    childs <- DoMutation(num.Inter, childs)
+    childs <- DoMutation(num.Inter, childs, p.Mut)
     
     # Choose the elitist population for the next generation
+    childs.Fitness <- sapply(1:nrow(childs), function(i = X) CalcFitness(T,unlist(childs[i,]),thresh))
+    elite <- which(childs.Fitness >= mean(childs.Fitness))
+    pop.Elite <- childs[elite,]
     
-    # Get the best from the first generation as criteria. 
-    which(pop.Fitness == max(pop.Fitness))
+    # Generate random individuals for the next generation
+    while(nrow(pop.Elite) < pop.Size){
+      pop.Elite <- rbind(pop.Elite, sample(1:num.Inter, k))
+    }
+    
+    population <- pop.Elite
     
     num.Gen <- num.Gen - 1
+    
+    print(num.Gen)
   }
+  
+  print("finishing...")
+  final.Fitness <- c()
+  for(i in 1:nrow(population)){
+    final.Fitness <- cbind(final.Fitness,CalcFitness(T,unlist(population[i,]),thresh))
+  }
+  
+  best <- which(population == max(final.Fitness))
+  
+  s <- population[best,]
   
   s
   
 }
 
 # Fitness calculation based on vehicles coverage.
-CalcFitness <- function(T, genome){
+CalcFitness <- function(T, individual, thresh){
   # subsetting those in the genome. 
-  V <- T[genome,]
-  V.Sum <- sapply(V,sum)
+  V <- c()
+  V <- sapply(X = T, FUN = function(x) rbind(V,x[individual]))
+  V.Sum <- colSums(V)
   n.Covered <- length(which(V.Sum >= thresh))
   coverage <- (n.Covered/nrow(T))*100
   coverage
@@ -79,7 +96,7 @@ TournamentSelection <- function(pop.Fitness, size = 2){
   parents <- c()
   pop.Rand <- sample(1:length(pop.Fitness))
   for(i in 1:length(pop.Rand)){
-    if((i %% 2) > 0){
+    if((i %% 2) > 0 && (i < length(pop.Rand))){
       x1 <- pop.Fitness[pop.Rand[i]]
       x2 <- pop.Fitness[pop.Rand[i+1]]
       if(x1 > x2){
@@ -92,7 +109,8 @@ TournamentSelection <- function(pop.Fitness, size = 2){
   parents
 }
 
-CorrectRepetition <- function(genome,num.Inter){
+# Remove duplicated in an individual.
+CorrectDuplicated <- function(genome,num.Inter){
   g <- genome
   while(anyDuplicated(g) > 0){
     g[anyDuplicated(g)] <- sample(1:num.Inter, size = 1)
@@ -101,11 +119,11 @@ CorrectRepetition <- function(genome,num.Inter){
 }
 
 # Create a new generation based on the crossover method chosen.
-GenerateChilds <- function(population, parents, num.Inter, crossover.Points = 1){
+GenerateChilds <- function(population, parents, num.Inter, crossover.Points = 1, p.Cross){
   childs <- c()
   len.Genome <- length(population[parents[1],])
-  for(p in 1:length(parents)){
-    if((i %% 2) > 0){
+  for(i in 1:length(parents)){
+    if((i %% 2) > 0 && (i < length(parents))){
       # add the pcross as criteria for reproduction.
       if(sample(0:1, size = 1, prob = c(1-p.Cross, p.Cross))){
         point <- sample(1:len.Genome,size = 1)
@@ -120,12 +138,12 @@ GenerateChilds <- function(population, parents, num.Inter, crossover.Points = 1)
         
         c1 <- append(t1,t2)
         names(c1) <- NULL
-        c1 <- CorrectRepetition(c1,num.Inter)
+        c1 <- CorrectDuplicated(c1,num.Inter)
         childs <- rbind(childs, c1)
         
         c2 <- append(t3,t4)
         names(c2) <- NULL
-        c2 <- CorrectRepetition(c1,num.Inter)
+        c2 <- CorrectDuplicated(c2,num.Inter)
         childs <- rbind(childs, c2)
       }
     }
@@ -134,7 +152,7 @@ GenerateChilds <- function(population, parents, num.Inter, crossover.Points = 1)
 }
 
 # Doing mutation based on its probability
-DoMutation <- function(num.Inter, childs){
+DoMutation <- function(num.Inter, childs, p.Mut){
   childs.Mut <- c()
   for(i in 1:nrow(childs)){
     genome <- childs[i,]
@@ -142,7 +160,7 @@ DoMutation <- function(num.Inter, childs){
       mut.Gene <- sample(1:length(genome), size = 1)
       genome[mut.Gene] <- sample(1:num.Inter, size = 1)
     }
-    genome <- CorrectRepetition(genome, num.Inter)
+    genome <- CorrectDuplicated(genome, num.Inter)
     childs.Mut <- rbind(childs.Mut, genome)
   }
   childs.Mut
