@@ -18,17 +18,16 @@ GeneticAlgorithm <- function(T = matrix(), k, thresh){
   
   print("initializing population.")
   
-  population <- data.frame()
   # generating random population.
   pop.Rand <- ceiling(pop.Size/2) # half of the population is going to be random.
-  for(i in 1:pop.Rand){
-    population <- rbind(population, sample(1:num.Inter, k))
-  }
+  population <- sapply(1:pop.Rand, function(i) sample(1:num.Inter, k))
   print("random population generated.")
   
   # generating greedy population.
   pop.Greedy <- pop.Size - pop.Rand
   print("starting greedy population")
+  population <- cbind(population, sapply(list, function))
+  sapply(1:pop.Greedy, do.call(GreedyAlgorithm, args = c(T, k, thresh))
   for(i in 1:pop.Greedy){
     print(i)
     population <- rbind(population, GreedyAlgorithm(T, k, thresh))
