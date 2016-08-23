@@ -8,6 +8,7 @@ GeneticAlgorithm <- function(T = matrix(), k, thresh){
   
   # initializing empty result list.
   s <- c()
+  best <- c()
   
   # population size
   num.Gen <- 100
@@ -26,19 +27,14 @@ GeneticAlgorithm <- function(T = matrix(), k, thresh){
   # generating greedy population.
   pop.Greedy <- pop.Size - pop.Rand
   print("starting greedy population")
-  population <- cbind(population, sapply(list, function))
-  sapply(1:pop.Greedy, do.call(GreedyAlgorithm, args = c(T, k, thresh))
-  for(i in 1:pop.Greedy){
-    print(i)
-    population <- rbind(population, GreedyAlgorithm(T, k, thresh))
-  }
+  population <- cbind(population, sapply(1:pop.Greedy, function(x) GreedyAlgorithm(T,k,thresh)))
   print("greedy population generated.")
   
   print("starting evolutionary approach.")
   while(num.Gen > 0){
     
     # Calculating population fitness.
-    pop.Fitness <- sapply(1:nrow(population), function(i = X) CalcFitness(T,unlist(population[i,]),thresh))
+    pop.Fitness <- sapply(1:ncol(population), function(i = X) CalcFitness(T,unlist(population[,i]),thresh))
     
     # Performing tournament selection with size 2. 
     # TODO: edit this function to accept different size of tournament selection.
@@ -55,23 +51,26 @@ GeneticAlgorithm <- function(T = matrix(), k, thresh){
     elite <- which(childs.Fitness >= mean(childs.Fitness))
     pop.Elite <- childs[elite,]
     
+    print(max(childs.Fitness))
+    best <- rbind(best,childs[which(childs.Fitness == max(childs.Fitness)),])
+    
     # Generate random individuals for the next generation
     # TODO: Check if this approach is correct
     while(nrow(pop.Elite) < pop.Size){
       pop.Elite <- rbind(pop.Elite, sample(1:num.Inter, k))
     }
-    population <- pop.Elite
+    population <- t(pop.Elite)
     
     num.Gen <- num.Gen - 1
     print(num.Gen)
   }
   
   print("finishing...")
-  final.Fitness <- sapply(1:nrow(population), function(i = X) CalcFitness(T,unlist(population[i,]),thresh))
+  final.Fitness <- sapply(1:nrow(best), function(i = X) CalcFitness(T,unlist(best[i,]),thresh))
   
-  best <- which(final.Fitness == max(final.Fitness))
+  it.Best <- which(final.Fitness == max(final.Fitness))
   
-  s <- population[best,]
+  s <- best[it.Best,]
   
   s
   
@@ -118,18 +117,18 @@ CorrectDuplicated <- function(genome,num.Inter){
 # Create a new generation based on the crossover method chosen.
 GenerateChilds <- function(population, parents, num.Inter, crossover.Points = 1, p.Cross){
   childs <- c()
-  len.Genome <- length(population[parents[1],])
+  len.Genome <- length(population[,parents[1]])
   for(i in 1:length(parents)){
     if((i %% 2) > 0 && (i < length(parents))){
       # add the pcross as criteria for reproduction.
       if(sample(0:1, size = 1, prob = c(1-p.Cross, p.Cross))){
         point <- sample(1:len.Genome,size = 1)
         
-        p1 <- unlist(population[parents[i],])
+        p1 <- unlist(population[,parents[i]])
         t1 <- p1[1:point-1]
         t3 <- p1[point:length(p1)]
         
-        p2 <- unlist(population[parents[i+1],])
+        p2 <- unlist(population[,parents[i+1]])
         t2 <- p2[point:length(p2)]
         t4 <- p2[1:point-1]
         

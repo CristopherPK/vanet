@@ -1,5 +1,4 @@
 GreedyAlgorithm <- function(T = matrix(), k, thresh){
-  # profvis({
   # Calculating boundaries
   num.Vehicles <- nrow(T)
   num.Inter <- length(T[[1]])
@@ -18,17 +17,15 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
     for(j in 1:num.Vehicles){
       # for each intersection. 
       Tj <- T[[j]]
-      for(i in 1:num.Inter){
-        if(!(i %in% s)){ # check if intersection wasn't chosen already.
-          Tij <- Tj[i]
-          if(Tij > 0){ # avoiding waste of processing time with zero values. 
-            if(Tij > (thresh - tj[j])){
-              W[i] <- W[i] + (thresh - tj[j])
-              tj[j] <- 0
-            } else {
-              tj[j] <- tj[j] + Tij
-              W[i] <- W[i] + Tij
-            }
+      for(i in S){
+        Tij <- Tj[i]
+        if(Tij > 0){ # avoiding waste of processing time with zero values. 
+          if(Tij >= (thresh - tj[j])){
+            W[i] <- W[i] + (thresh - tj[j])
+            tj[j] <- 0
+          } else {
+            tj[j] <- tj[j] + Tij
+            W[i] <- W[i] + Tij
           }
         }
       }
@@ -36,15 +33,14 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
     
     # this line was changed to be used as input to the genetic approach.
     # w <- which(W == max(W)) 
-    
     # genetic approach change
     Ws <- sort(W,decreasing = TRUE)
     w <- which(W == sample(Ws[1:10],size = 1))
-    
     s <- (append(s, w))
+    not.S <- which(S == w)
+    S <- S[-not.S]
     k = k-1
   }
   
   s
-  # })
 }
