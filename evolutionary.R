@@ -42,14 +42,36 @@ Evolutionary <- function(T = matrix(), k, thresh){
     # execute one-point mutation with probability pmut
     children <- DoMutation(num.Inter, children, p.Mut)
     
-    # choose the elitist population
-    children.Fitness <- sapply(1:nrow(children), function(x) Fitness(T,children[x,],thresh))
+    # fixing n of RSUs in a genome
+    children <- sapply(1:nrow(children), function(i) CorrectGenome(children[i,],k))
     
-    # FIX THE K RSUs AFTER CROSSOVER AND MUTATION
+    # choose the elitist population
+    children.Fitness <- sapply(1:ncol(children), function(x) Fitness(T,children[,x],thresh))
+    best <- which(children.Fitness == max(children.Fitness))
+    population <- sapply(1:(len.Pop-1), 
+                        function(x) GenerateIndividual(
+                          sample(1:num.Intersections,size = k),
+                          num.Intersections
+                        )
+    )
+    
+    population <- cbind(population, children[,best])
     
     num.Gen <- num.Gen - 1
+    print(max(children.Fitness))
+    print(num.Gen)
   }
   
+}
+
+CorrectGenome <- function(genome, k){
+  pos <- which(genome == TRUE)
+  while(length(pos) > k){
+    i <- sample(1:length(pos),size = 1)
+    genome[pos[i]] <- FALSE
+    pos <- which(genome == TRUE)
+  }
+  genome
 }
 
 GenerateIndividual <- function(points, length){
