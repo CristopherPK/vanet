@@ -32,44 +32,53 @@ Evolutionary <- function(T = matrix(), k, thresh){
   while(num.Gen > 0){
     # evaluate individuals according with fitness function
     pop.Fitness <- sapply(1:ncol(population), function(x) Fitness(T,population[,x],thresh))
+    best <- which(pop.Fitness == max(pop.Fitness))
     
-    # choose parents
-    parents <- TournamentSelection(pop.Fitness)
+    new.Population <- matrix(population[,best])
     
-    # execute one-point crossover with probability pcross
-    children <- GenerateChildren(population, parents, num.Intersections,1,p.Cross)
+    while(ncol(new.Population) < len.Pop){
+      # choose parents
+      parents <- TournamentSelection(pop.Fitness)
+      
+      # execute one-point crossover with probability pcross
+      children <- GenerateChildren(population, parents, num.Intersections,1,p.Cross)
+      
+      # execute one-point mutation with probability pmut
+      children <- DoMutation(num.Inter, children, p.Mut)
+      
+      # fixing n of RSUs in a genome
+      children <- sapply(1:nrow(children), function(i) CorrectGenome(children[i,],k))
+      
+      new.Population <- cbind(new.Population, children)
+    }
     
-    # execute one-point mutation with probability pmut
-    children <- DoMutation(num.Inter, children, p.Mut)
-    
-    # fixing n of RSUs in a genome
-    children <- sapply(1:nrow(children), function(i) CorrectGenome(children[i,],k))
-    
-    # choose the elitist population
-    children.Fitness <- sapply(1:ncol(children), function(x) Fitness(T,children[,x],thresh))
-    best <- which(children.Fitness == max(children.Fitness))
-    population <- sapply(1:(len.Pop-1), 
-                        function(x) GenerateIndividual(
-                          sample(1:num.Intersections,size = k),
-                          num.Intersections
-                        )
-    )
-    
-    population <- cbind(population, children[,best])
+    population <- new.Population[,1:200]
     
     num.Gen <- num.Gen - 1
-    print(max(children.Fitness))
     print(num.Gen)
   }
+  
+  result.Fitness <- sapply(1:ncol(population), function(x) Fitness(T,population[,x],thresh))
+  result <- which(pop.Fitness == max(pop.Fitness))
+  
+  population[,result]
   
 }
 
 CorrectGenome <- function(genome, k){
   pos <- which(genome == TRUE)
-  while(length(pos) > k){
-    i <- sample(1:length(pos),size = 1)
-    genome[pos[i]] <- FALSE
-    pos <- which(genome == TRUE)
+  if(length(pos) > k){
+    while(length(pos) > k){
+      i <- sample(pos,size = 1)
+      genome[i] <- FALSE
+      pos <- which(genome == TRUE)
+    }
+  } else {
+    while(length(pos) < k){
+      i <- sample((1:length(genome))[-pos],size = 1)
+      genome[i] <- TRUE
+      pos <- which(genome == TRUE)
+    }
   }
   genome
 }
@@ -84,6 +93,7 @@ GenerateIndividual <- function(points, length){
 Fitness <- function(T, individual, thresh){
   # subsetting those in the genome. 
   pos <- which(individual == TRUE)
+  #print(pos)
   V <- sapply(1:num.Vehicles, function(i) unlist(T[i,])[pos])
   V.Sum <- colSums(V)
   n.Covered <- length(which(V.Sum >= thresh))
