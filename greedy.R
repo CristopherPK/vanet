@@ -25,7 +25,7 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
             tj[j] <- 0
           } else {
             tj[j] <- tj[j] + Tij
-            W[i] <- W[i] + Tijchrome
+            W[i] <- W[i] + Tij
           }
         }
       }
