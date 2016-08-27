@@ -34,7 +34,7 @@ Evolutionary <- function(T = matrix(), k, thresh){
     pop.Fitness <- sapply(1:ncol(population), function(x) Fitness(T,population[,x],thresh))
     best <- which(pop.Fitness == max(pop.Fitness))
     
-    new.Population <- matrix(population[,best])
+    new.Population <- matrix(population[,best],nrow = num.Intersections)
     
     while(ncol(new.Population) < len.Pop){
       # choose parents
@@ -48,13 +48,13 @@ Evolutionary <- function(T = matrix(), k, thresh){
       
       # fixing n of RSUs in a genome
       children <- sapply(1:nrow(children), function(i) CorrectGenome(children[i,],k))
-      
       new.Population <- cbind(new.Population, children)
     }
     
     population <- new.Population[,1:200]
     
     num.Gen <- num.Gen - 1
+    print(max(pop.Fitness))
     print(num.Gen)
   }
   
@@ -74,8 +74,13 @@ CorrectGenome <- function(genome, k){
       pos <- which(genome == TRUE)
     }
   } else {
+    #print(pos)
     while(length(pos) < k){
-      i <- sample((1:length(genome))[-pos],size = 1)
+      if(length(pos) == 0){
+        i <- sample((1:length(genome)),size = 1)  
+      } else {
+        i <- sample((1:length(genome))[-pos],size = 1)
+      }
       genome[i] <- TRUE
       pos <- which(genome == TRUE)
     }
