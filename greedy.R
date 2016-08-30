@@ -32,10 +32,12 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
     }
     
     # this line was changed to be used as input to the genetic approach.
-    # w <- which(W == max(W)) 
+    w <- which(W == max(W)) 
+    
     # genetic approach change
-    Ws <- sort(W,decreasing = TRUE)
-    w <- which(W == sample(Ws[1:10],size = 1))
+    # Ws <- sort(W,decreasing = TRUE)
+    # w <- which(W == sample(Ws[1:10],size = 1))
+    
     s <- (append(s, w))
     not.S <- which(S == w)
     S <- S[-not.S]

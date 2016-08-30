@@ -20,13 +20,13 @@ Evolutionary <- function(T = matrix(), k, thresh){
                      )
   
   # cbind 100:200
-  population <- cbind(population,
-                      sapply( 1:len.Pop.Greedy, 
-                      function(x) GenerateIndividual(
-                        GreedyAlgorithm(T,k,thresh),
-                        num.Intersections
-                      )
-                ))
+  #population <- cbind(population,
+   #                   sapply( 1:len.Pop.Greedy, 
+    #                  function(x) GenerateIndividual(
+     #                   GreedyAlgorithm(T,k,thresh),
+      #                  num.Intersections
+       #               )
+        #        ))
   
   # start while loop
   while(num.Gen > 0){
@@ -59,7 +59,7 @@ Evolutionary <- function(T = matrix(), k, thresh){
   }
   
   result.Fitness <- sapply(1:ncol(population), function(x) Fitness(T,population[,x],thresh))
-  result <- which(pop.Fitness == max(pop.Fitness))
+  result <- which(result.Fitness == max(result.Fitness))
   
   population[,result]
   
@@ -95,17 +95,19 @@ GenerateIndividual <- function(points, length){
   individual
 }
 
+# Fitness calculation based on vehicles coverage.
 Fitness <- function(T, individual, thresh){
   # subsetting those in the genome. 
   pos <- which(individual == TRUE)
   #print(pos)
-  V <- sapply(1:num.Vehicles, function(i) unlist(T[i,])[pos])
+  V <- sapply(1:nrow(T), function(i) unlist(T[i,])[pos])
   V.Sum <- colSums(V)
   n.Covered <- length(which(V.Sum >= thresh))
   coverage <- (n.Covered/nrow(T))*100
   coverage
 }
 
+# Tournament selection with size 2 function.
 TournamentSelection <- function(pop.Fitness, size = 2){
   parents <- c()
   pop.Rand <- sample(1:length(pop.Fitness))
@@ -123,6 +125,7 @@ TournamentSelection <- function(pop.Fitness, size = 2){
   parents
 }
 
+# Create a new generation based on the crossover method chosen.
 GenerateChildren <- function(population, parents, num.Inter, crossover.Points = 1, p.Cross){
   childs <- c()
   len.Genome <- length(population[,parents[1]])
