@@ -1,22 +1,23 @@
 GreedyAlgorithm <- function(T = matrix(), k, thresh){
   # Calculating boundaries
-  num.Vehicles <- nrow(T)
-  num.Inter <- length(T[[1]])
+  num.Vehicles <- ncol(T)
+  num.Inter <- nrow(T)
   
   # initial set with all intersections. 
   S <- 1:num.Inter
   
   # initializing empty result list.
   s <- c()
+  
+  tj <- c(rep.int(x = 0,times = num.Vehicles))
 
   while(k > 0 || length(S) == 0){
     W <- c(rep.int(x = 0,times = num.Inter))
-    tj <- c(rep.int(x = 0,times = num.Vehicles))
     
     # for each vehicle.
     for(j in 1:num.Vehicles){
       # for each intersection. 
-      Tj <- T[[j]]
+      Tj <- T[,j]
       for(i in S){
         Tij <- Tj[i]
         if(Tij > 0){ # avoiding waste of processing time with zero values. 

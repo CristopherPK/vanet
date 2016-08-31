@@ -100,10 +100,10 @@ Fitness <- function(T, individual, thresh){
   # subsetting those in the genome. 
   pos <- which(individual == TRUE)
   #print(pos)
-  V <- sapply(1:nrow(T), function(i) unlist(T[i,])[pos])
+  V <- sapply(1:ncol(T), function(i) unlist(T[,i])[pos])
   V.Sum <- colSums(V)
   n.Covered <- length(which(V.Sum >= thresh))
-  coverage <- (n.Covered/nrow(T))*100
+  coverage <- (n.Covered/ncol(T))*100
   coverage
 }
 
