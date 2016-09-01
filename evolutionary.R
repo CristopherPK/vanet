@@ -8,8 +8,8 @@ Evolutionary <- function(T = matrix(), k, thresh){
   len.Pop.Greedy <- len.Pop - len.Pop.Rand
   
   # get info about the data
-  num.Intersections <- length(T[[1]])
-  num.Vehicles <- nrow(T)
+  num.Intersections <- nrow(T)
+  num.Vehicles <- ncol(T)
   
   # initialize population
   population <-sapply(1:len.Pop.Rand, 
@@ -20,13 +20,13 @@ Evolutionary <- function(T = matrix(), k, thresh){
                      )
   
   # cbind 100:200
-  #population <- cbind(population,
-   #                   sapply( 1:len.Pop.Greedy, 
-    #                  function(x) GenerateIndividual(
-     #                   GreedyAlgorithm(T,k,thresh),
-      #                  num.Intersections
-       #               )
-        #        ))
+  population <- cbind(population,
+                      sapply( 1:len.Pop.Greedy, 
+                      function(x) GenerateIndividual(
+                        GreedyAlgorithm(T,k,thresh),
+                        num.Intersections
+                      )
+                ))
   
   # start while loop
   while(num.Gen > 0){
@@ -101,8 +101,8 @@ Fitness <- function(T, individual, thresh){
   pos <- which(individual == TRUE)
   V <- sapply(1:ncol(T), function(i) unlist(T[,i])[pos])
   V.Sum <- colSums(V)
-  # n.Covered <- length(which(V.Sum >= thresh))
-  n.Covered <- length(which(V.Sum > 0))
+  n.Covered <- length(which(V.Sum >= thresh))
+  # n.Covered <- length(which(V.Sum > 0))
   coverage <- (n.Covered/ncol(T))*100
   coverage
 }

@@ -11,7 +11,7 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
   
   tj <- c(rep.int(x = thresh,times = num.Vehicles))
 
-  while(k > 0 || length(S) == 0){
+  while(k > 0){
     W <- c(rep.int(x = 0,times = num.Inter))
     
     # for each vehicle.
@@ -31,14 +31,12 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
     }
     
     # this line was changed to be used as input to the genetic approach.
-    w <- which(W == max(W)) 
-    print(w)
+    # w <- which(W == max(W)) 
+    # genetic approach change
+    Ws <- sort(W,decreasing = TRUE)
+    w <- which(W == sample(Ws[1:10],size = 1))
     
     tj <- sapply(1:num.Vehicles, function(x) if(tj[x] > 0) (tj[x] - T[w,x]) else 0)
-    
-    # genetic approach change
-    # Ws <- sort(W,decreasing = TRUE)
-    # w <- which(W == sample(Ws[1:10],size = 1))
     
     s <- append(s, w)
     not.S <- which(S == w)
