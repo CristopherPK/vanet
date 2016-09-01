@@ -9,7 +9,7 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
   # initializing empty result list.
   s <- c()
   
-  tj <- c(rep.int(x = 0,times = num.Vehicles))
+  tj <- c(rep.int(x = thresh,times = num.Vehicles))
 
   while(k > 0 || length(S) == 0){
     W <- c(rep.int(x = 0,times = num.Inter))
@@ -20,26 +20,27 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
       Tj <- T[,j]
       for(i in S){
         Tij <- Tj[i]
-        if(Tij > 0){ # avoiding waste of processing time with zero values. 
-          if(Tij >= (thresh - tj[j])){
-            W[i] <- W[i] + (thresh - tj[j])
+        if(Tij > tj[j]) {
+          if(tj[j] < 0){
             tj[j] <- 0
-          } else {
-            tj[j] <- tj[j] + Tij
-            W[i] <- W[i] + Tij
           }
+          Tij <- tj[j]
         }
+        W[i] <- W[i] + Tij
       }
     }
     
     # this line was changed to be used as input to the genetic approach.
     w <- which(W == max(W)) 
+    print(w)
+    
+    tj <- sapply(1:num.Vehicles, function(x) if(tj[x] > 0) (tj[x] - T[w,x]) else 0)
     
     # genetic approach change
     # Ws <- sort(W,decreasing = TRUE)
     # w <- which(W == sample(Ws[1:10],size = 1))
     
-    s <- (append(s, w))
+    s <- append(s, w)
     not.S <- which(S == w)
     S <- S[-not.S]
     k = k-1

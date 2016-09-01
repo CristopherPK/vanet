@@ -99,10 +99,10 @@ GenerateIndividual <- function(points, length){
 Fitness <- function(T, individual, thresh){
   # subsetting those in the genome. 
   pos <- which(individual == TRUE)
-  #print(pos)
   V <- sapply(1:ncol(T), function(i) unlist(T[,i])[pos])
   V.Sum <- colSums(V)
-  n.Covered <- length(which(V.Sum >= thresh))
+  # n.Covered <- length(which(V.Sum >= thresh))
+  n.Covered <- length(which(V.Sum > 0))
   coverage <- (n.Covered/ncol(T))*100
   coverage
 }
