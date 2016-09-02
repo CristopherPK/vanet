@@ -1,4 +1,4 @@
-GreedyAlgorithm <- function(T = matrix(), k, thresh){
+RandomGreedyAlgorithm <- function(T = matrix(), k, thresh){
   # Calculating boundaries
   num.Vehicles <- ncol(T)
   num.Inter <- nrow(T)
@@ -10,7 +10,7 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
   s <- c()
   
   tj <- c(rep.int(x = thresh,times = num.Vehicles))
-
+  
   while(k > 0){
     W <- c(rep.int(x = 0,times = num.Inter))
     
@@ -30,7 +30,8 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
       }
     }
     
-    w <- which(W == max(W)) 
+    Ws <- sort(W,decreasing = TRUE)
+    w <- which(W == sample(Ws[1:10],size = 1))
     
     tj <- sapply(1:num.Vehicles, function(x) if(tj[x] > 0) (tj[x] - T[w,x]) else 0)
     

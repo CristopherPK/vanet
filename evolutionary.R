@@ -23,7 +23,7 @@ Evolutionary <- function(T = matrix(), k, thresh){
   population <- cbind(population,
                       sapply( 1:len.Pop.Greedy, 
                       function(x) GenerateIndividual(
-                        GreedyAlgorithm(T,k,thresh),
+                        RandomGreedyAlgorithm(T,k,thresh),
                         num.Intersections
                       )
                 ))
@@ -96,6 +96,9 @@ GenerateIndividual <- function(points, length){
 }
 
 # Fitness calculation based on vehicles coverage.
+# T : matrix of intersections x vehicles
+# individual : logical vector with deployment points defined as TRUE. 
+# thresh: time required for transmission.
 Fitness <- function(T, individual, thresh){
   # subsetting those in the genome. 
   pos <- which(individual == TRUE)
