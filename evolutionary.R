@@ -1,4 +1,4 @@
-Evolutionary <- function(T = matrix(), k, thresh){
+Evolutionary <- function(T = matrix(), k, thresh, len.Pop, p.Cross, p.Mut){
   print("starting genetic algorithm...")
   timestamp()
   # starting parallel parameters
@@ -11,9 +11,6 @@ Evolutionary <- function(T = matrix(), k, thresh){
   
   # define evolutionary params
   num.Gen <- 100
-  p.Cross <- 0.90
-  p.Mut <- 0.10
-  len.Pop <- 200
   len.Pop.Rand <- ceiling(len.Pop/2) # half of the population is going to be random.
   len.Pop.Greedy <- len.Pop - len.Pop.Rand
   
