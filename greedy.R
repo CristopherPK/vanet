@@ -18,19 +18,21 @@ GreedyAlgorithm <- function(T = matrix(), k, thresh){
     for(j in 1:num.Vehicles){
       # for each intersection. 
       Tj <- T[,j]
+      time <- tj[j]
       for(i in S){
         Tij <- Tj[i]
-        if(Tij > tj[j]) {
-          if(tj[j] < 0){
+        if(Tij > time) {
+          if(time < 0){
             tj[j] <- 0
+            time <- 0
           }
-          Tij <- tj[j]
+          Tij <- time
         }
         W[i] <- W[i] + Tij
       }
     }
     
-    w <- which(W == max(W)) 
+    w <- which(W == max(W))
     
     tj <- sapply(1:num.Vehicles, function(x) if(tj[x] > 0) (tj[x] - T[w,x]) else 0)
     

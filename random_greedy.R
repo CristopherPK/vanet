@@ -18,13 +18,15 @@ RandomGreedyAlgorithm <- function(T = matrix(), k, thresh){
     for(j in 1:num.Vehicles){
       # for each intersection. 
       Tj <- T[,j]
+      time <- tj[j]
       for(i in S){
         Tij <- Tj[i]
-        if(Tij > tj[j]) {
-          if(tj[j] < 0){
+        if(Tij > time) {
+          if(time < 0){
             tj[j] <- 0
+            time <- 0
           }
-          Tij <- tj[j]
+          Tij <- time
         }
         W[i] <- W[i] + Tij
       }

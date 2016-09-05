@@ -1,4 +1,14 @@
 Evolutionary <- function(T = matrix(), k, thresh){
+  print("starting genetic algorithm...")
+  timestamp()
+  # starting parallel parameters
+  library(parallel)
+  # Calculate the number of cores
+  no_cores <- detectCores()
+  
+  # Initiate cluster
+  cl <- makeCluster(no_cores)
+  
   # define evolutionary params
   num.Gen <- 100
   p.Cross <- 0.90
@@ -12,7 +22,8 @@ Evolutionary <- function(T = matrix(), k, thresh){
   num.Vehicles <- ncol(T)
   
   # initialize population
-  population <-sapply(1:len.Pop.Rand, 
+  clusterExport(cl, c("GenerateIndividual","num.Intersections","k"))
+  population <-parSapply(cl,1:len.Pop.Rand, 
                      function(x) GenerateIndividual(
                       sample(1:num.Intersections,size = k),
                       num.Intersections
@@ -20,21 +31,27 @@ Evolutionary <- function(T = matrix(), k, thresh){
                      )
   
   # cbind 100:200
+  clusterExport(cl, c("RandomGreedyAlgorithm","T","thresh"))
   population <- cbind(population,
-                      sapply( 1:len.Pop.Greedy, 
+                      parSapply(cl,1:len.Pop.Greedy,
                       function(x) GenerateIndividual(
                         RandomGreedyAlgorithm(T,k,thresh),
                         num.Intersections
                       )
                 ))
   
+  print("population initialized")
+  timestamp()
+  
   # start while loop
   while(num.Gen > 0){
+    clusterExport(cl, "Fitness")
     # evaluate individuals according with fitness function
-    pop.Fitness <- sapply(1:ncol(population), function(x) Fitness(T,population[,x],thresh))
+    pop.Fitness <- parSapply(cl,1:ncol(population), function(x) Fitness(T,population[,x],thresh))
     best <- which(pop.Fitness == max(pop.Fitness))
     
-    new.Population <- matrix(population[,best],nrow = num.Intersections)
+    
+    new.Population <- matrix(population[,best[1]],nrow = num.Intersections)
     
     while(ncol(new.Population) < len.Pop){
       # choose parents
@@ -47,7 +64,8 @@ Evolutionary <- function(T = matrix(), k, thresh){
       children <- DoMutation(num.Inter, children, p.Mut)
       
       # fixing n of RSUs in a genome
-      children <- sapply(1:nrow(children), function(i) CorrectGenome(children[i,],k))
+      clusterExport(cl, "CorrectGenome")
+      children <- parSapply(cl,1:nrow(children), function(i) CorrectGenome(children[i,],k))
       new.Population <- cbind(new.Population, children)
     }
     
@@ -58,8 +76,13 @@ Evolutionary <- function(T = matrix(), k, thresh){
     print(num.Gen)
   }
   
-  result.Fitness <- sapply(1:ncol(population), function(x) Fitness(T,population[,x],thresh))
+  result.Fitness <- parSapply(cl,1:ncol(population), function(x) Fitness(T,population[,x],thresh))
   result <- which(result.Fitness == max(result.Fitness))
+  
+  stopCluster(cl)
+  
+  print("finishing genetic algorithm")
+  timestamp()
   
   population[,result]
   
