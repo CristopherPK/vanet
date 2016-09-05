@@ -19,7 +19,7 @@ Evolutionary <- function(T = matrix(), k, thresh, len.Pop, p.Cross, p.Mut){
   num.Vehicles <- ncol(T)
   
   # initialize population
-  clusterExport(cl, c("GenerateIndividual","num.Intersections","k"))
+  clusterExport(cl, c("GenerateIndividual"))
   population <-parSapply(cl,1:len.Pop.Rand, 
                      function(x) GenerateIndividual(
                       sample(1:num.Intersections,size = k),
@@ -28,7 +28,7 @@ Evolutionary <- function(T = matrix(), k, thresh, len.Pop, p.Cross, p.Mut){
                      )
   
   # cbind 100:200
-  clusterExport(cl, c("RandomGreedyAlgorithm","T","thresh"))
+  clusterExport(cl, c("RandomGreedyAlgorithm"))
   population <- cbind(population,
                       parSapply(cl,1:len.Pop.Greedy,
                       function(x) GenerateIndividual(

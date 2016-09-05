@@ -5,8 +5,6 @@ T1 <- data.matrix(read.table("Scenes/E1-T-60s-4CP"))
 T2 <- data.matrix(read.table("Scenes/E2-T-60s-4CP"))
 T3 <- data.matrix(read.table("Scenes/E3-T-60s-4CP"))
 
-result <- GeneticAlgorithm(T,5,30)
-
 # greedy result for T0 data set
 g0 <- GenerateIndividual(GreedyAlgorithm(T0,5,30), nrow(T0))
 Fitness(T0,g0,30)
@@ -49,3 +47,15 @@ fitness.Baar <- sapply(1:ncol(total_result3), function(x) Fitness(T3,total_resul
 mean(fitness.Baar)
 
 # Fitness : 45.89915
+
+# Evaluate the algorithm and return the fitness.
+evaluate <- function(data, times, k, thresh, pop.Size, p.Cross, p.Mut){
+  final.Result <- c()
+  for(i in 1:5){
+    result <- Evolutionary(data,k,thresh,pop.Size,p.Cross,p.Mut)
+    final.Result <- cbind(result[,1],final.Result.Baar)
+  }
+  
+  fitness <- sapply(1:ncol(total_result3), function(x) Fitness(data,final.Result[,x],thresh))
+  mean(fitness)
+}
